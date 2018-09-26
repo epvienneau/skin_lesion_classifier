@@ -30,7 +30,7 @@ class img_loader(data.Dataset):
         gray_img = scipy.misc.imread(img_file)
         gray_img = normalizeImage(gray_img)
         gray_img = cv2.resize(gray_img, (224, 224)) #now its 224x224x3 for resnet
-        gray_img = np.swapaxes(gray_img, 0, 2) #make it 3x512x512
+        gray_img = np.swapaxes(gray_img, 0, 2) #make it 3x224x224
         gray_img = gray_img.astype('float')
         probs = probs.astype('float')
         return [gray_img, probs]
