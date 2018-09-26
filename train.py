@@ -61,8 +61,8 @@ def main():
                         help='number of epochs to train (default: 1)')
     parser.add_argument('--lr', type=float, default=0.005, metavar='LR',
                         help='learning rate (default: 0.005)')
-    parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
-                        help='SGD momentum (default: 0.5)')
+    #parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
+    #                    help='SGD momentum (default: 0.5)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
                         help='disables CUDA training')
     parser.add_argument('--seed', type=int, default=1, metavar='S',
@@ -117,7 +117,7 @@ def main():
     model.fc = nn.Linear(num_ftrs, 7)
     model.double()
     #need to use adam optimizer
-    optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
