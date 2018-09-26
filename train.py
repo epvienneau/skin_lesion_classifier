@@ -22,7 +22,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
         data, target = data.to(device), target.to(device)
         optimizer.zero_grad() 
         output = model(data)
-        criterion = nn.MSELoss()
+        criterion = nn.CrossEntropyLoss()
         loss = criterion(output, target)
         loss.backward()
         optimizer.step()
@@ -40,7 +40,7 @@ def test(args, model, device, test_loader):
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
-            criterion = nn.MSELoss()
+            criterion = nn.CrossEntropyLoss()
             test_loss += criterion(output, target).item() 
             #pred = output.max(1, keepdim=True)[1]
             correct += output.eq(target.view_as(output)).sum().item()
