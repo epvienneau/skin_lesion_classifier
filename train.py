@@ -57,10 +57,10 @@ def main():
                         help='input batch size for training (default: 1)')
     parser.add_argument('--test-batch-size', type=int, default=1, metavar='N',
                         help='input batch size for testing (default: 1)')
-    parser.add_argument('--epochs', type=int, default=20, metavar='N',
-                        help='number of epochs to train (default: 20)')
-    parser.add_argument('--lr', type=float, default=0.01, metavar='LR',
-                        help='learning rate (default: 0.01)')
+    parser.add_argument('--epochs', type=int, default=1, metavar='N',
+                        help='number of epochs to train (default: 1)')
+    parser.add_argument('--lr', type=float, default=0.005, metavar='LR',
+                        help='learning rate (default: 0.005)')
     parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
                         help='SGD momentum (default: 0.5)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
@@ -77,7 +77,7 @@ def main():
     device = torch.device("cuda" if use_cuda else "cpu")
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
-    # parse txt file to create dictionary for dataloader
+    # parse csv file to create dictionary for dataloader
     probs_train = []
     probs_test = []
     img_file_train = []
@@ -110,6 +110,9 @@ def main():
     test_loader = torch.utils.data.DataLoader(img_loader(data_test), batch_size=args.batch_size, shuffle=True, **kwargs) 
 
     model = models.resnet18(pretrained=True, **kwargs).to(device)
+    for params in model.parameters():
+        params.requires_grad = False
+    #only the final classification layer is learnable
     num_ftrs = model.fc.in_features
     model.fc = nn.Linear(num_ftrs, 7)
     model.double()
@@ -123,7 +126,7 @@ def main():
     #epoch_axis = range(args.epochs)
     #plt.plot(epoch_axis, training_loss, 'r', epoch_axis, validation_loss, 'b')
     #plt.show()
-    #torch.save(model.state_dict(), './Resnetmodel.pt')
+    torch.save(model.state_dict(), './Resnetmodel.pt')
     #with open('loss.csv', 'w', newline='') as csvfile:
     #    losswriter = csv.writer(csvfile, dialect='excel', delimiter=' ', 
     #            quotechar='|', quoting=csv.QUOTE_MINIMAL)

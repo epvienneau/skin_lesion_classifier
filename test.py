@@ -22,6 +22,9 @@ def test(model, test_loader):
 
 def main():
     model = models.resnet18()
+    for params in model.parameters():
+        params.requires_grad = False
+    #only the final classification layer is learned
     num_ftrs = model.fc.in_features
     model.fc = nn.Linear(num_ftrs, 7)
     model.double()
