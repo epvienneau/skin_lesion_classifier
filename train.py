@@ -12,6 +12,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import csv
+import sklearn.metrics as metrics
 
 training_loss = []
 validation_loss = []
@@ -37,14 +38,18 @@ def test(args, model, device, test_loader):
     model.eval()
     test_loss = 0
     correct = 0
+    true = []
+    predictions = []
     with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
             output = model(data)
             criterion = nn.CrossEntropyLoss()
             target = torch.max(target, 1)[1]
+            true.append(target)
             test_loss += criterion(output, target).item() 
             pred = output.max(1, keepdim=True)[1]
+            predictions.append(pred)
             correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
@@ -52,6 +57,14 @@ def test(args, model, device, test_loader):
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
+    print(np.reshape(torch.stack(true).data.numpy()), (10))
+    print(np.reshape(torch.stack(predictions).data.numpy()), (10))
+    accuracy = metrics.accuracy_score(torch.stack(true).data.numpy(), torch.stack(predictions).data.numpy())
+    print(accuracy)
+    #recall = metrics.recall_score(torch.stack(true).data.numpy(), torch.stack(predictions).data.numpy())
+    #print(recall)
+    precision = metrics.precision_score(torch.stack(true).data.numpy(), torch.stack(predictions).data.numpy())
+    print(precision)
 
 def main():
     parser = argparse.ArgumentParser(description='PyTorch Object Detection Example')
