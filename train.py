@@ -23,6 +23,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
         optimizer.zero_grad() 
         output = model(data)
         criterion = nn.CrossEntropyLoss()
+        target = torch.max(target, 1)[1]
         loss = criterion(output, target)
         loss.backward()
         optimizer.step()
@@ -41,9 +42,10 @@ def test(args, model, device, test_loader):
             data, target = data.to(device), target.to(device)
             output = model(data)
             criterion = nn.CrossEntropyLoss()
+            target = torch.max(target, 1)[1]
             test_loss += criterion(output, target).item() 
-            #pred = output.max(1, keepdim=True)[1]
-            correct += output.eq(target.view_as(output)).sum().item()
+            pred = output.max(1, keepdim=True)[1]
+            correct += pred.eq(target.view_as(pred)).sum().item()
 
     test_loss /= len(test_loader.dataset)
     validation_loss.append(test_loss)
@@ -59,8 +61,11 @@ def main():
                         help='input batch size for testing (default: 1)')
     parser.add_argument('--epochs', type=int, default=1, metavar='N',
                         help='number of epochs to train (default: 1)')
-    parser.add_argument('--lr', type=float, default=0.005, metavar='LR',
-                        help='learning rate (default: 0.005)')
+    parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
+                        help='learning rate (default: 0.001)')
+    parser.add_argument('--beta1', type=float, default=0.9, help='Beta1 for Adam (default: 0.9)')
+    parser.add_argument('--beta2', type=float, default=0.999, help='Beta2 for Adam (default: 0.999)')
+    parser.add_argument('--eps', type=float, default=1e-8, help='Epsilon for Adam (default: 1e-8)')
     #parser.add_argument('--momentum', type=float, default=0.5, metavar='M',
     #                    help='SGD momentum (default: 0.5)')
     parser.add_argument('--no-cuda', action='store_true', default=False,
@@ -82,9 +87,9 @@ def main():
     probs_test = []
     img_file_train = []
     img_file_test = []
-    img_path_train = ['data/train/']*9015
-    img_path_test = ['data/test/']*1000
-    with open('data/labels/Train_labels.csv', 'r') as f:
+    img_path_train = ['data/train_mini/']*100
+    img_path_test = ['data/test_mini/']*10
+    with open('data/labels_mini/Train_labels.csv', 'r') as f:
         next(f)
         for count, line in enumerate(f):
             file_info = line.split()[0] #get single line
@@ -94,7 +99,7 @@ def main():
             probs = probs.split(',') #probs, as a list of strings
             probs = list(map(int, probs)) #probs as a list of ints
             probs_train.append(probs)
-    with open('data/labels/Test_labels.csv', 'r') as f:
+    with open('data/labels_mini/Test_labels.csv', 'r') as f:
         next(f)
         for count, line in enumerate(f):
             file_info = line.split()[0] #get single line
@@ -117,7 +122,7 @@ def main():
     model.fc = nn.Linear(num_ftrs, 7)
     model.double()
     #need to use adam optimizer
-    optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(args.beta1, args.beta2), eps=args.eps)
 
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
