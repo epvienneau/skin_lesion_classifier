@@ -23,6 +23,7 @@ class img_loader(data.Dataset):
         subinfo = self.sub_list
         img_folder = subinfo[0][index]
         img_name = subinfo[1][index]
+        img_name = img_name + '.jpg'
         probs = subinfo[2][index]
         img_file = os.path.join(img_folder, img_name)
         gray_img = scipy.misc.imread(img_file)

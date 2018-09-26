@@ -78,38 +78,42 @@ def main():
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     # parse txt file to create dictionary for dataloader
-    coord1_train = []
-    coord2_train = []
-    coord1_val = []
-    coord2_val = []
+    probs_train = []
+    probs_test = []
     img_file_train = []
-    img_file_val = []
-    img_path_train = ['train/']*105
-    img_path_val = ['validation/']*10
-    with open('labels/labels.txt', 'r') as f:
+    img_file_test = []
+    img_path_train = ['data/train/']*9015
+    img_path_test = ['data/test/']*1000
+    with open('data/labels/Train_labels.csv', 'r') as f:
+        next(f)
         for count, line in enumerate(f):
-            #line = f.readline()
-            line = line.split() #now line is a list
-            file_num = line[0]
-            file_num = file_num.split('.')
-            file_num = int(file_num[0]) #now file_num is just the file number 
-            if file_num<111:
-                img_file_train.append(line[0])
-                coord1_train.append(float(line[1]))
-                coord2_train.append(float(line[2]))
-            else:
-                img_file_val.append(line[0])
-                coord1_val.append(float(line[1]))
-                coord2_val.append(float(line[2]))
-    data_train = [coord1_train, coord2_train, img_file_train, img_path_train]
-    data_val = [coord1_val, coord2_val, img_file_val, img_path_val] 
+            file_info = line.split()[0] #get single line
+            file_info = file_info.split(',', 1) #separate file name from probs
+            img_file_train.append(file_info[0]) #pull out img file str
+            probs = file_info[1] #probs, as a single str with commas in it
+            probs = probs.split(',') #probs, as a list of strings
+            probs = list(map(int, probs)) #probs as a list of ints
+            probs_train.append(probs)
+    with open('data/labels/Test_labels.csv', 'r') as f:
+        next(f)
+        for count, line in enumerate(f):
+            file_info = line.split()[0] #get single line
+            file_info = file_info.split(',', 1) #separate file name from probs
+            img_file_test.append(file_info[0]) #pull out img file str
+            probs = file_info[1] #probs, as a single str with commas in it
+            probs = probs.split(',') #probs, as a list of strings
+            probs = list(map(int, probs)) #probs as a list of ints
+            probs_test.append(probs)
+    data_train = [img_path_train, img_file_train, probs_train]
+    data_test = [img_path_test, img_file_test, probs_test] 
     train_loader = torch.utils.data.DataLoader(img_loader(data_train), batch_size=args.batch_size, shuffle=True, **kwargs)
-    test_loader = torch.utils.data.DataLoader(img_loader(data_val), batch_size=args.batch_size, shuffle=True, **kwargs) 
+    test_loader = torch.utils.data.DataLoader(img_loader(data_test), batch_size=args.batch_size, shuffle=True, **kwargs) 
 
     model = models.resnet18(pretrained=True, **kwargs).to(device)
     num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, 2)
+    model.fc = nn.Linear(num_ftrs, 7)
     model.double()
+    #need to use adam optimizer
     optimizer = optim.SGD(model.parameters(), lr=args.lr, momentum=args.momentum)
 
     for epoch in range(1, args.epochs + 1):
@@ -119,20 +123,20 @@ def main():
     #epoch_axis = range(args.epochs)
     #plt.plot(epoch_axis, training_loss, 'r', epoch_axis, validation_loss, 'b')
     #plt.show()
-    torch.save(model.state_dict(), './Resnetmodel.pt')
-    with open('loss.csv', 'w', newline='') as csvfile:
-        losswriter = csv.writer(csvfile, dialect='excel', delimiter=' ', 
-                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    #torch.save(model.state_dict(), './Resnetmodel.pt')
+    #with open('loss.csv', 'w', newline='') as csvfile:
+    #    losswriter = csv.writer(csvfile, dialect='excel', delimiter=' ', 
+    #            quotechar='|', quoting=csv.QUOTE_MINIMAL)
         #losswriter.writerow(str(args.epochs))
         #losswriter.writerow(str(args.batch-size))
-        losswriter.writerow('training')
-        print(len(training_loss))
-        print(len(validation_loss))
-        for item in training_loss:
-            losswriter.writerow(str(round(item, 4)))
-        losswriter.writerow('validation')
-        for item in validation_loss:
-            losswriter.writerow(str(round(item, 4)))
+    #    losswriter.writerow('training')
+    #    print(len(training_loss))
+    #    print(len(validation_loss))
+    #    for item in training_loss:
+    #        losswriter.writerow(str(round(item, 4)))
+    #    losswriter.writerow('validation')
+    #    for item in validation_loss:
+    #        losswriter.writerow(str(round(item, 4)))
 
 
 if __name__ == '__main__':
