@@ -13,6 +13,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 import sklearn.metrics as metrics
+from tabulate import tabulate
 
 training_loss = []
 validation_loss = []
@@ -57,14 +58,18 @@ def test(args, model, device, test_loader):
     print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
         test_loss, correct, len(test_loader.dataset),
         100. * correct / len(test_loader.dataset)))
-    print(np.reshape(torch.stack(true).data.numpy()), (10))
-    print(np.reshape(torch.stack(predictions).data.numpy()), (10))
-    accuracy = metrics.accuracy_score(torch.stack(true).data.numpy(), torch.stack(predictions).data.numpy())
-    print(accuracy)
-    #recall = metrics.recall_score(torch.stack(true).data.numpy(), torch.stack(predictions).data.numpy())
-    #print(recall)
-    precision = metrics.precision_score(torch.stack(true).data.numpy(), torch.stack(predictions).data.numpy())
-    print(precision)
+    true = np.reshape(torch.stack(true).data.numpy(), (10))
+    predictions = np.reshape(torch.stack(predictions).data.numpy(), (10))
+    accuracy = metrics.accuracy_score(true, predictions)
+    print('Statistics:')
+    print('Accuracy: {:.0f}%'.format(100. * accuracy))
+    recall = metrics.recall_score(true, predictions)
+    print('Recall: {:.0f} '.format(recall))
+    precision = metrics.precision_score(true, predictions)
+    print('Precision: {:.0f}'.format(precision))
+    confusion = metrics.confusion_matrix(true, predictions)
+    print('Confusion:')
+    print(tabulate(confusion))
 
 def main():
     parser = argparse.ArgumentParser(description='PyTorch Object Detection Example')
