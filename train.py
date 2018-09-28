@@ -64,15 +64,15 @@ def test(args, model, device, test_loader):
     print('Statistics:')
     print('Accuracy: {:.0f}%'.format(100. * accuracy))
     recall = metrics.recall_score(true, predictions)
-    print('Recall: {:.0f} '.format(recall))
+    print('Recall: {:.2f} '.format(recall))
     precision = metrics.precision_score(true, predictions)
-    print('Precision: {:.0f}'.format(precision))
+    print('Precision: {:.2f}'.format(precision))
     confusion = metrics.confusion_matrix(true, predictions)
     print('Confusion:')
     print(tabulate(confusion))
 
 def main():
-    parser = argparse.ArgumentParser(description='PyTorch Object Detection Example')
+    parser = argparse.ArgumentParser(description='PyTorch Mutliclass Classification')
     parser.add_argument('--batch-size', type=int, default=1, metavar='N',
                         help='input batch size for training (default: 1)')
     parser.add_argument('--test-batch-size', type=int, default=1, metavar='N',
