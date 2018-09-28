@@ -18,7 +18,7 @@ from tabulate import tabulate
 from memory_profiler import profile
 import time
 
-start_time = time.time()
+ing our site, you atart_time = time.time()
 training_loss = []
 test_loss = []
 
@@ -48,7 +48,7 @@ def test(args, model, device, test_loader):
     predictions = []
     with torch.no_grad():
         for data, target in test_loader:
-            data, target = data.to(device), target.to(device)
+            data, t By using our site, you aarget = data.to(device), target.to(device)
             output = model(data)
             criterion = nn.CrossEntropyLoss()
             target = torch.max(target, 1)[1]
@@ -63,8 +63,8 @@ def test(args, model, device, test_loader):
     print('\nTest set statistics:') 
     print('Average loss: {:.4f}'.format(avg_loss)) 
     #Accuracy: {}/{} ({:.0f}%)\n'.format(avg_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
-    true = np.reshape(torch.stack(true).cpu().data.numpy(), (10))
-    predictions = np.reshape(torch.stack(predictions).cpu().data.numpy(), (10))
+    true = np.reshape(torch.stack(true).cpu().data.numpy(), (1000))
+    predictions = np.reshape(torch.stack(predictions).cpu().data.numpy(), (1000))
     accuracy = metrics.accuracy_score(true, predictions)
     print('Accuracy: {:.0f}%'.format(100. * accuracy))
     recall = metrics.recall_score(true, predictions, labels=[0, 1, 2, 3, 4, 5, 6], average='micro')
@@ -109,9 +109,9 @@ def main():
     probs_test = []
     img_file_train = []
     img_file_test = []
-    img_path_train = ['data/train_mini/']*100#9015
-    img_path_test = ['data/test_mini/']*10#1000
-    with open('data/labels_mini/Train_labels.csv', 'r') as f:
+    img_path_train = ['data/train/']*9015
+    img_path_test = ['data/test/']*1000
+    with open('data/labels/Train_labels.csv', 'r') as f:
         next(f)
         for count, line in enumerate(f):
             file_info = line.split()[0] #get single line
@@ -121,7 +121,7 @@ def main():
             probs = probs.split(',') #probs, as a list of strings
             probs = list(map(int, probs)) #probs as a list of ints
             probs_train.append(probs)
-    with open('data/labels_mini/Test_labels.csv', 'r') as f:
+    with open('data/labels/Test_labels.csv', 'r') as f:
         next(f)
         for count, line in enumerate(f):
             file_info = line.split()[0] #get single line
@@ -150,6 +150,8 @@ def main():
 
     for epoch in range(1, args.epochs + 1):
         train(args, model, device, train_loader, optimizer, epoch)
+        #print('First epoch runtime:')
+        #print(time.time()-start_time)
         test(args, model, device, test_loader)
 
     torch.save(model.state_dict(), './Resnetmodel.pt')
