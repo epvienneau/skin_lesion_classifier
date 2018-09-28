@@ -42,7 +42,6 @@ def main():
     print('Prediction:')
     print(lookup[prediction])
     #plt.imshow(img)
-    #plt.scatter([prediction[0]*326], [predicition[1]*490])
     #plt.show()
 
 

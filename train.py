@@ -13,10 +13,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 import sklearn.metrics as metrics
+import datetime
 from tabulate import tabulate
 
 training_loss = []
-validation_loss = []
+test_loss = []
 
 def train(args, model, device, train_loader, optimizer, epoch):
     model.train()
@@ -34,10 +35,11 @@ def train(args, model, device, train_loader, optimizer, epoch):
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.item()))
         training_loss.append(loss.item())
-  
+
 def test(args, model, device, test_loader):
     model.eval()
-    test_loss = 0
+    loss = 0
+    avg_loss = 0
     correct = 0
     true = []
     predictions = []
@@ -48,20 +50,19 @@ def test(args, model, device, test_loader):
             criterion = nn.CrossEntropyLoss()
             target = torch.max(target, 1)[1]
             true.append(target)
-            test_loss += criterion(output, target).item() 
+            loss += criterion(output, target).item() 
+            avg_loss += loss
+            test_loss.append(loss)
             pred = output.max(1, keepdim=True)[1]
             predictions.append(pred)
             correct += pred.eq(target.view_as(pred)).sum().item()
-
-    test_loss /= len(test_loader.dataset)
-    validation_loss.append(test_loss)
-    print('\nTest set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-        test_loss, correct, len(test_loader.dataset),
-        100. * correct / len(test_loader.dataset)))
+    avg_loss /= len(test_loader.dataset)
+    print('\nTest set statistics:') 
+    print('Average loss: {:.4f}'.format(avg_loss)) 
+    #Accuracy: {}/{} ({:.0f}%)\n'.format(avg_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
     true = np.reshape(torch.stack(true).data.numpy(), (10))
     predictions = np.reshape(torch.stack(predictions).data.numpy(), (10))
     accuracy = metrics.accuracy_score(true, predictions)
-    print('Statistics:')
     print('Accuracy: {:.0f}%'.format(100. * accuracy))
     recall = metrics.recall_score(true, predictions)
     print('Recall: {:.2f} '.format(recall))
@@ -149,21 +150,34 @@ def main():
     #epoch_axis = range(args.epochs)
     #plt.plot(epoch_axis, training_loss, 'r', epoch_axis, validation_loss, 'b')
     #plt.show()
+    
     torch.save(model.state_dict(), './Resnetmodel.pt')
-    #with open('loss.csv', 'w', newline='') as csvfile:
-    #    losswriter = csv.writer(csvfile, dialect='excel', delimiter=' ', 
-    #            quotechar='|', quoting=csv.QUOTE_MINIMAL)
-        #losswriter.writerow(str(args.epochs))
-        #losswriter.writerow(str(args.batch-size))
-    #    losswriter.writerow('training')
-    #    print(len(training_loss))
-    #    print(len(validation_loss))
-    #    for item in training_loss:
-    #        losswriter.writerow(str(round(item, 4)))
-    #    losswriter.writerow('validation')
-    #    for item in validation_loss:
-    #        losswriter.writerow(str(round(item, 4)))
-
+    
+    current_daytime = str(datetime.datetime.now()).replace(" ", "_")[:-7]    
+    loss_file = 'loss_outputs/loss_'+current_daytime
+    with open(loss_file, 'w', newline='') as csvfile:
+        losswriter = csv.writer(csvfile, dialect='excel', delimiter=' ', 
+                quotechar='|', quoting=csv.QUOTE_MINIMAL)
+        losswriter.writerow('Batch Size')
+        losswriter.writerow(str(args.batch_size))
+        losswriter.writerow('Test Batch Size')
+        losswriter.writerow(str(args.test_batch_size))
+        losswriter.writerow('Epochs')
+        losswriter.writerow(str(args.epochs))
+        losswriter.writerow('Learning Rate')
+        losswriter.writerow(str(args.lr))
+        losswriter.writerow('Beta 1')
+        losswriter.writerow(str(args.beta1))
+        losswriter.writerow('Beta 2')
+        losswriter.writerow(str(args.beta2))
+        losswriter.writerow('Epsilon')
+        losswriter.writerow(str(args.eps))
+        losswriter.writerow('training')
+        for item in training_loss:
+            losswriter.writerow(str(round(item, 4)))
+        losswriter.writerow('testing')
+        for item in test_loss:
+            losswriter.writerow(str(round(item, 4)))
 
 if __name__ == '__main__':
     main()
