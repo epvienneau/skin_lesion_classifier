@@ -68,7 +68,7 @@ def test(args, model, device, test_loader):
     print('Recall: {:.2f} '.format(recall))
     precision = metrics.precision_score(true, predictions)
     print('Precision: {:.2f}'.format(precision))
-    confusion = metrics.confusion_matrix(true, predictions)
+    confusion = metrics.confusion_matrix(true, predictions, [1, 2, 3, 4, 5, 6, 7])
     print('Confusion:')
     print(tabulate(confusion))
 
@@ -147,10 +147,6 @@ def main():
         train(args, model, device, train_loader, optimizer, epoch)
         test(args, model, device, test_loader)
 
-    #epoch_axis = range(args.epochs)
-    #plt.plot(epoch_axis, training_loss, 'r', epoch_axis, validation_loss, 'b')
-    #plt.show()
-    
     torch.save(model.state_dict(), './Resnetmodel.pt')
     
     current_daytime = str(datetime.datetime.now()).replace(" ", "_")[:-7]    
