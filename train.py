@@ -60,8 +60,8 @@ def test(args, model, device, test_loader):
     print('\nTest set statistics:') 
     print('Average loss: {:.4f}'.format(avg_loss)) 
     #Accuracy: {}/{} ({:.0f}%)\n'.format(avg_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
-    true = np.reshape(torch.stack(true).data.numpy(), (10))
-    predictions = np.reshape(torch.stack(predictions).data.numpy(), (10))
+    true = np.reshape(torch.stack(true).cpu().data.numpy(), (10))
+    predictions = np.reshape(torch.stack(predictions).cpu().data.numpy(), (10))
     accuracy = metrics.accuracy_score(true, predictions)
     print('Accuracy: {:.0f}%'.format(100. * accuracy))
     recall = metrics.recall_score(true, predictions)
@@ -95,11 +95,10 @@ def main():
                         help='how many batches to wait before logging training status')
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
-
     torch.manual_seed(args.seed)
-
+    
     device = torch.device("cuda" if use_cuda else "cpu")
-
+    
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
     # parse csv file to create dictionary for dataloader
     probs_train = []
@@ -133,13 +132,15 @@ def main():
     train_loader = torch.utils.data.DataLoader(img_loader(data_train), batch_size=args.batch_size, shuffle=True, **kwargs)
     test_loader = torch.utils.data.DataLoader(img_loader(data_test), batch_size=args.batch_size, shuffle=True, **kwargs) 
 
-    model = models.resnet18(pretrained=True, **kwargs).to(device)
+    #model = models.resnet18(pretrained=True, **kwargs).to(device)
+    model = models.resnet18(pretrained=True).to(device)
     for params in model.parameters():
         params.requires_grad = False
     #only the final classification layer is learnable
     num_ftrs = model.fc.in_features
     model.fc = nn.Linear(num_ftrs, 7)
     model.double()
+    model = model.cuda()
     #need to use adam optimizer
     optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(args.beta1, args.beta2), eps=args.eps)
 
