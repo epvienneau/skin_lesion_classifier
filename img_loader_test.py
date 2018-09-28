@@ -21,8 +21,8 @@ class img_loader(data.Dataset):
     def __getitem__(self, index):
         # load image
         subinfo = self.sub_list
-        img_folder = subinfo[0][index]
-        img_name = subinfo[1][index]
+        img_folder = subinfo[0]
+        img_name = subinfo[1]
         img_name = img_name + '.jpg'
         img_file = os.path.join(img_folder, img_name)
         gray_img = scipy.misc.imread(img_file)

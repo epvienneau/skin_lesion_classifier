@@ -18,6 +18,7 @@ def test(model, test_loader):
     with torch.no_grad():
         for data in test_loader:
             output = model(data[0])
+            output = output.max(1, keepdim=True)[1]
     return output
 
 def main():
@@ -36,10 +37,10 @@ def main():
     data_test = [img_path, img_name] 
     test_loader = torch.utils.data.DataLoader(img_loader(data_test))
     prediction = test(model, test_loader)
-
-    print(prediction)
-    prediction=prediction[0]
-    img = cv2.imread(img_name, 0)
+    lookup = {'1': 'melanoma', '2': 'melanocytic nevus', '3': 'basal cell carcinoma', '4': 'actinic keratosis', '5': 'benign keratosis', '6': 'dermatofibroma', '7': 'vascular lesion'}
+    prediction = str(prediction.numpy()[0][0])
+    print('Prediction:')
+    print(lookup[prediction])
     #plt.imshow(img)
     #plt.scatter([prediction[0]*326], [predicition[1]*490])
     #plt.show()
