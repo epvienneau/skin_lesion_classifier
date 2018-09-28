@@ -48,7 +48,7 @@ def test(args, model, device, test_loader):
     predictions = []
     with torch.no_grad():
         for data, target in test_loader:
-            data, t By using our site, you aarget = data.to(device), target.to(device)
+            data, target = data.to(device), target.to(device)
             output = model(data)
             criterion = nn.CrossEntropyLoss()
             target = torch.max(target, 1)[1]
