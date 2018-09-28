@@ -68,7 +68,7 @@ def test(args, model, device, test_loader):
     print('Recall: {:.2f} '.format(recall))
     precision = metrics.precision_score(true, predictions)
     print('Precision: {:.2f}'.format(precision))
-    confusion = metrics.confusion_matrix(true, predictions, [1, 2, 3, 4, 5, 6, 7])
+    confusion = metrics.confusion_matrix(true, predictions, [0, 1, 2, 3, 4, 5, 6])
     print('Confusion:')
     print(tabulate(confusion))
 
