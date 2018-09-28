@@ -18,7 +18,7 @@ from tabulate import tabulate
 from memory_profiler import profile
 import time
 
-ing our site, you atart_time = time.time()
+start_time = time.time()
 training_loss = []
 test_loss = []
 
