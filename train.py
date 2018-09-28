@@ -15,7 +15,10 @@ import csv
 import sklearn.metrics as metrics
 import datetime
 from tabulate import tabulate
+from memory_profiler import profile
+import time
 
+start_time = time.time()
 training_loss = []
 test_loss = []
 
@@ -72,6 +75,7 @@ def test(args, model, device, test_loader):
     print('Confusion:')
     print(tabulate(confusion))
 
+#@profile
 def main():
     parser = argparse.ArgumentParser(description='PyTorch Mutliclass Classification')
     parser.add_argument('--batch-size', type=int, default=1, metavar='N',
@@ -105,9 +109,9 @@ def main():
     probs_test = []
     img_file_train = []
     img_file_test = []
-    img_path_train = ['data/train_mini/']*100
-    img_path_test = ['data/test_mini/']*10
-    with open('data/labels_mini/Train_labels.csv', 'r') as f:
+    img_path_train = ['data/train/']*9015
+    img_path_test = ['data/test/']*1000
+    with open('data/labels/Train_labels.csv', 'r') as f:
         next(f)
         for count, line in enumerate(f):
             file_info = line.split()[0] #get single line
@@ -117,7 +121,7 @@ def main():
             probs = probs.split(',') #probs, as a list of strings
             probs = list(map(int, probs)) #probs as a list of ints
             probs_train.append(probs)
-    with open('data/labels_mini/Test_labels.csv', 'r') as f:
+    with open('data/labels/Test_labels.csv', 'r') as f:
         next(f)
         for count, line in enumerate(f):
             file_info = line.split()[0] #get single line
@@ -175,6 +179,8 @@ def main():
         losswriter.writerow('testing')
         for item in test_loss:
             losswriter.writerow(str(round(item, 4)))
+    end_time = time.time()
+    print('\nElapsed Time: {:.02f} seconds\n'.format(end_time-start_time))
 
 if __name__ == '__main__':
     main()
