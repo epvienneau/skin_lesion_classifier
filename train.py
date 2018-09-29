@@ -21,6 +21,10 @@ import time
 start_time = time.time()
 training_loss = []
 test_loss = []
+accuracy = []
+precision = []
+recall = []
+confusion = []
 
 def train(args, model, device, train_loader, optimizer, epoch):
     model.train()
@@ -37,7 +41,7 @@ def train(args, model, device, train_loader, optimizer, epoch):
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.item()))
-        training_loss.append(loss.item())
+    training_loss.append(loss.item())
 
 def test(args, model, device, test_loader):
     model.eval()
@@ -49,31 +53,36 @@ def test(args, model, device, test_loader):
     with torch.no_grad():
         for data, target in test_loader:
             data, target = data.to(device), target.to(device)
-            output = model(data)
+            output = F.log_softmax(model(data), dim=1)
             criterion = nn.CrossEntropyLoss()
             target = torch.max(target, 1)[1]
             true.append(target)
             loss += criterion(output, target).item() 
             avg_loss += loss
-            test_loss.append(loss)
             pred = output.max(1, keepdim=True)[1]
             predictions.append(pred)
             correct += pred.eq(target.view_as(pred)).sum().item()
     avg_loss /= len(test_loader.dataset)
+    test_loss.append(avg_loss)
     print('\nTest set statistics:') 
     print('Average loss: {:.4f}'.format(avg_loss)) 
     #Accuracy: {}/{} ({:.0f}%)\n'.format(avg_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
-    true = np.reshape(torch.stack(true).cpu().data.numpy(), (1000))
-    predictions = np.reshape(torch.stack(predictions).cpu().data.numpy(), (1000))
-    accuracy = metrics.accuracy_score(true, predictions)
-    print('Accuracy: {:.0f}%'.format(100. * accuracy))
-    recall = metrics.recall_score(true, predictions, labels=[0, 1, 2, 3, 4, 5, 6], average='micro')
-    print('Recall: {:.2f} '.format(recall))
-    precision = metrics.precision_score(true, predictions, labels=[0, 1, 2, 3, 4, 5, 6], average='micro')
-    print('Precision: {:.2f}'.format(precision))
-    confusion = metrics.confusion_matrix(true, predictions, labels=[0, 1, 2, 3, 4, 5, 6])
+    true = np.reshape(torch.stack(true).cpu().data.numpy(), (10))
+    predictions = np.reshape(torch.stack(predictions).cpu().data.numpy(), (10))
+    a = metrics.accuracy_score(true, predictions)
+    accuracy.append(a)
+    print('Accuracy: {:.0f}%'.format(100. * a))
+    r = metrics.recall_score(true, predictions, labels=[0, 1, 2, 3, 4, 5, 6], average='micro')
+    recall.append(r)
+    print('Recall: {:.2f} '.format(r))
+    p = metrics.precision_score(true, predictions, labels=[0, 1, 2, 3, 4, 5, 6], average='micro')
+    precision.append(p)
+    print('Precision: {:.2f}'.format(p))
+    c = metrics.confusion_matrix(true, predictions, labels=[0, 1, 2, 3, 4, 5, 6])
+    for item in np.reshape(c, (49, 1)):
+        confusion.append(item)
     print('Confusion:')
-    print(tabulate(confusion))
+    print(tabulate(c))
 
 #@profile
 def main():
@@ -109,9 +118,9 @@ def main():
     probs_test = []
     img_file_train = []
     img_file_test = []
-    img_path_train = ['data/train/']*9015
-    img_path_test = ['data/test/']*1000
-    with open('data/labels/Train_labels.csv', 'r') as f:
+    img_path_train = ['data/train_mini/']*100#9015
+    img_path_test = ['data/test_mini/']*10#1000
+    with open('data/labels_mini/Train_labels.csv', 'r') as f:
         next(f)
         for count, line in enumerate(f):
             file_info = line.split()[0] #get single line
@@ -121,7 +130,7 @@ def main():
             probs = probs.split(',') #probs, as a list of strings
             probs = list(map(int, probs)) #probs as a list of ints
             probs_train.append(probs)
-    with open('data/labels/Test_labels.csv', 'r') as f:
+    with open('data/labels_mini/Test_labels.csv', 'r') as f:
         next(f)
         for count, line in enumerate(f):
             file_info = line.split()[0] #get single line
@@ -175,12 +184,31 @@ def main():
         losswriter.writerow(str(args.beta2))
         losswriter.writerow('Epsilon')
         losswriter.writerow(str(args.eps))
+        
+        losswriter.writerow('accuracy')
+        for item in accuracy:
+            losswriter.writerow(str(round(item, 4)))
+        
+        losswriter.writerow('recall')
+        for item in recall:
+            losswriter.writerow(str(round(item, 4)))
+        
+        losswriter.writerow('precision')
+        for item in precision:
+            losswriter.writerow(str(round(item, 4)))
+        
+        losswriter.writerow('confusion')
+        for item in confusion:
+            losswriter.writerow(str(item))
+        
         losswriter.writerow('training')
         for item in training_loss:
             losswriter.writerow(str(round(item, 4)))
+        
         losswriter.writerow('testing')
         for item in test_loss:
             losswriter.writerow(str(round(item, 4)))
+    
     end_time = time.time()
     print('\nElapsed Time: {:.02f} seconds\n'.format(end_time-start_time))
 
