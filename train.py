@@ -91,8 +91,8 @@ def main():
                         help='input batch size for training (default: 1)')
     parser.add_argument('--test-batch-size', type=int, default=1, metavar='N',
                         help='input batch size for testing (default: 1)')
-    parser.add_argument('--epochs', type=int, default=1, metavar='N',
-                        help='number of epochs to train (default: 1)')
+    parser.add_argument('--epochs', type=int, default=10, metavar='N',
+                        help='number of epochs to train (default: 10)')
     parser.add_argument('--lr', type=float, default=0.001, metavar='LR',
                         help='learning rate (default: 0.001)')
     parser.add_argument('--beta1', type=float, default=0.9, help='Beta1 for Adam (default: 0.9)')
@@ -146,7 +146,7 @@ def main():
     test_loader = torch.utils.data.DataLoader(img_loader(data_test), batch_size=args.batch_size, shuffle=True, **kwargs) 
 
     #model = models.resnet18(pretrained=True, **kwargs).to(device)
-    model = models.resnet18(pretrained=True).to(device)
+    model = models.resnet50(pretrained=True).to(device)
     for params in model.parameters():
         params.requires_grad = False
     #only the final classification layer is learnable
@@ -184,6 +184,8 @@ def main():
         losswriter.writerow(str(args.beta2))
         losswriter.writerow('Epsilon')
         losswriter.writerow(str(args.eps))
+        losswriter.writerow('Time(s)')
+        losswriter.writerow(str(end_time-start_time))
         
         losswriter.writerow('accuracy')
         for item in accuracy:
