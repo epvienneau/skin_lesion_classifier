@@ -151,7 +151,10 @@ def main():
         params.requires_grad = False
     #only the final classification layer is learnable
     num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, 7)
+    model.fc = nn.Linear(num_ftrs, 300)
+    model.fc = nn.Linear(300, 100)
+    model.fc = nn.Linear(100, 30)
+    model.fc = nn.Linear(30, 7)
     model.double()
     model = model.cuda()
     #need to use adam optimizer
@@ -184,8 +187,6 @@ def main():
         losswriter.writerow(str(args.beta2))
         losswriter.writerow('Epsilon')
         losswriter.writerow(str(args.eps))
-        losswriter.writerow('Time(s)')
-        losswriter.writerow(str(end_time-start_time))
         
         losswriter.writerow('accuracy')
         for item in accuracy:
