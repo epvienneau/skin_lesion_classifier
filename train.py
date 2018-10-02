@@ -67,8 +67,8 @@ def test(args, model, device, test_loader):
     print('\nTest set statistics:') 
     print('Average loss: {:.4f}'.format(avg_loss)) 
     #Accuracy: {}/{} ({:.0f}%)\n'.format(avg_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
-    true = np.reshape(torch.stack(true).cpu().data.numpy(), (10))
-    predictions = np.reshape(torch.stack(predictions).cpu().data.numpy(), (10))
+    true = np.reshape(torch.stack(true).cpu().data.numpy(), (1000))
+    predictions = np.reshape(torch.stack(predictions).cpu().data.numpy(), (1000))
     a = metrics.accuracy_score(true, predictions)
     accuracy.append(a)
     print('Accuracy: {:.0f}%'.format(100. * a))
@@ -118,9 +118,9 @@ def main():
     probs_test = []
     img_file_train = []
     img_file_test = []
-    img_path_train = ['data/train_mini/']*100#9015
-    img_path_test = ['data/test_mini/']*10#1000
-    with open('data/labels_mini/Train_labels.csv', 'r') as f:
+    img_path_train = ['data/train/']*9015
+    img_path_test = ['data/test/']*1000
+    with open('data/labels/Train_labels.csv', 'r') as f:
         next(f)
         for count, line in enumerate(f):
             file_info = line.split()[0] #get single line
@@ -130,7 +130,7 @@ def main():
             probs = probs.split(',') #probs, as a list of strings
             probs = list(map(int, probs)) #probs as a list of ints
             probs_train.append(probs)
-    with open('data/labels_mini/Test_labels.csv', 'r') as f:
+    with open('data/labels/Test_labels.csv', 'r') as f:
         next(f)
         for count, line in enumerate(f):
             file_info = line.split()[0] #get single line
