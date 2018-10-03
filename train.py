@@ -64,6 +64,7 @@ def test(args, model, device, test_loader):
             correct += pred.eq(target.view_as(pred)).sum().item()
     avg_loss /= len(test_loader.dataset)
     test_loss.append(avg_loss)
+    
     print('\nTest set statistics:') 
     print('Average loss: {:.4f}'.format(avg_loss)) 
     #Accuracy: {}/{} ({:.0f}%)\n'.format(avg_loss, correct, len(test_loader.dataset), 100. * correct / len(test_loader.dataset)))
@@ -105,7 +106,7 @@ def main():
     parser.add_argument('--seed', type=int, default=1, metavar='S',
                         help='random seed (default: 1)')
     parser.add_argument('--log-interval', type=int, default=10, metavar='N',
-                        help='how many batches to wait before logging training status')
+            help='how many batches to wait before logging training status')
     args = parser.parse_args()
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     torch.manual_seed(args.seed)
@@ -143,7 +144,7 @@ def main():
     data_train = [img_path_train, img_file_train, probs_train]
     data_test = [img_path_test, img_file_test, probs_test] 
     train_loader = torch.utils.data.DataLoader(img_loader(data_train), batch_size=args.batch_size, shuffle=True, **kwargs)
-    test_loader = torch.utils.data.DataLoader(img_loader(data_test), batch_size=args.batch_size, shuffle=True, **kwargs) 
+    test_loader = torch.utils.data.DataLoader(img_loader(data_test), batch_size=args.test_batch_size, shuffle=True, **kwargs) 
 
     #model = models.resnet18(pretrained=True, **kwargs).to(device)
     model = models.resnet50(pretrained=True).to(device)
@@ -152,9 +153,9 @@ def main():
     #only the final classification layer is learnable
     num_ftrs = model.fc.in_features
     model.fc = nn.Linear(num_ftrs, 300)
-    model.fc = nn.Linear(300, 100)
-    model.fc = nn.Linear(100, 30)
-    model.fc = nn.Linear(30, 7)
+    model.fc = nn.Linear(model.fc.in_features, 100)
+    model.fc = nn.Linear(model.fc.in_features, 30)
+    model.fc = nn.Linear(model.fc.in_features, 7)
     model.double()
     model = model.cuda()
     #need to use adam optimizer
