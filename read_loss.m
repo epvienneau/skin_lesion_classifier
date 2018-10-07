@@ -1,18 +1,18 @@
-file = 'loss_outputs/loss_2018-10-07_01:15:10';
+file = 'loss_outputs/final-metrics.xlsx';
 training = xlsread(file, 'A540:A549');
 testing = xlsread(file, 'A551:A560');
+confusion_mat = xlsread(file, 1, 'A490:A538');
 %%
-%figure(1), clf
-%plot(num(1:21:end)), hold on, plot(num2), hold off
-figure(2), clf
-plot(training(1:21:end), '-*', 'LineWidth', 1.5)
+figure(1), clf
+plot(training, '-*', 'LineWidth', 1.5)
 grid on
 xlabel('epochs')
 ylabel('Cross Entropy Loss')
 title('Training Loss')
-figure(3), clf
+figure(2), clf
 plot(testing, '-*', 'LineWidth', 1.5)
 grid on
 xlabel('epochs')
 ylabel('Cross Entropy Loss')
 title('Testing Loss')
+confusion_mat = reshape(confusion_mat, 7, 7)
