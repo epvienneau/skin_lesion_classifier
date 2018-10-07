@@ -40,7 +40,7 @@ def main():
     model.fc = nn.Linear(model.fc.in_features, 7)
     model.double()
     model.load_state_dict(torch.load('Resnetmodel.pt'))
-    model = model.cuda()
+    #model = model.cuda()
 
     img_path = 'data/test/'
     img_name = sys.argv[1]
