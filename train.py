@@ -146,15 +146,23 @@ def main():
     test_loader = torch.utils.data.DataLoader(img_loader(data_test), batch_size=args.batch_size, shuffle=True, **kwargs) 
 
     #model = models.resnet18(pretrained=True, **kwargs).to(device)
-    model = models.resnet50(pretrained=True).to(device)
+    model = models.resnet152(pretrained=True).to(device)
     for params in model.parameters():
         params.requires_grad = False
     #only the final classification layer is learnable
     num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, 300)
-    model.fc = nn.Linear(300, 100)
-    model.fc = nn.Linear(100, 30)
-    model.fc = nn.Linear(30, 7)
+    model.fc = nn.Linear(model.fc.in_features, 512)
+    model.dropout = nn.Dropout(0.5)
+    model.fc = nn.Linear(model.fc.in_features, 256)
+    model.dropout = nn.Dropout(0.5)
+    model.fc = nn.Linear(model.fc.in_features, 128)
+    model.dropout = nn.Dropout(0.5)
+    model.fc = nn.Linear(model.fc.in_features, 64)
+    model.dropout = nn.Dropout(0.5)
+    model.fc = nn.Linear(model.fc.in_features, 32)
+    model.dropout = nn.Dropout(0.5)
+    model.fc = nn.Linear(model.fc.in_features, 16)
+    model.fc = nn.Linear(model.fc.in_features, 7)
     model.double()
     model = model.cuda()
     #need to use adam optimizer
