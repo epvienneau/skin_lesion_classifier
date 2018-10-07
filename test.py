@@ -23,16 +23,25 @@ def test(model, test_loader):
     return output
 
 def main():
-    model = models.resnet18()
+    model = models.resnet152()
     for params in model.parameters():
         params.requires_grad = False
-    #only the final classification layer is learned
-    num_ftrs = model.fc.in_features
-    model.fc = nn.Linear(num_ftrs, 7)
+    model.fc = nn.Linear(model.fc.in_features, 512)
+    model.dropout = nn.Dropout(0.5)
+    model.fc = nn.Linear(model.fc.in_features, 256)
+    model.dropout = nn.Dropout(0.5)
+    model.fc = nn.Linear(model.fc.in_features, 128)
+    model.dropout = nn.Dropout(0.5)
+    model.fc = nn.Linear(model.fc.in_features, 64)
+    model.dropout = nn.Dropout(0.5)
+    model.fc = nn.Linear(model.fc.in_features, 32)
+    model.dropout = nn.Dropout(0.5)
+    model.fc = nn.Linear(model.fc.in_features, 16)
+    model.fc = nn.Linear(model.fc.in_features, 7)
     model.double()
-
     model.load_state_dict(torch.load('Resnetmodel.pt'))
-   
+    model = model.cuda()
+
     img_path = 'data/test/'
     img_name = sys.argv[1]
     data_test = [img_path, img_name] 
